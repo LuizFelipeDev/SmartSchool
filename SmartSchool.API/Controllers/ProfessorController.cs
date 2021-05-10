@@ -14,7 +14,7 @@ namespace SmartSchool.API.Controllers
 {
     [ApiController]
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class ProfessorController : ControllerBase
     {
         private readonly IRepository _repo;
@@ -28,20 +28,31 @@ namespace SmartSchool.API.Controllers
 
         [HttpGet]
         public IActionResult Get()
-        {            
+        {
             var professores = _repo.GetAllProfessores();
             return Ok(_mapper.Map<IEnumerable<ProfessorDto>>(professores));
         }
 
-        [HttpGet("byId/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var prof = _repo.GetProfessorById(id);
+            var prof = _repo.GetProfessorById(id, true);
             if (prof == null) return BadRequest("O professor nao foi encontrado");
 
             var profDto = _mapper.Map<ProfessorDto>(prof);
 
             return Ok(profDto);
+        }
+
+        [HttpGet("byAluno/{alunoId}")]
+        public IActionResult GetByAlunoId(int alunoId)
+        {
+            var professores = _repo.GetProfessoresByAlunoId(alunoId, true);
+            if (professores == null) return BadRequest("Nenhum professor encontrado");
+
+            var professoresDto = _mapper.Map<IEnumerable<ProfessorDto>>(professores);
+
+            return Ok(professoresDto);
         }
 
         [HttpPost]

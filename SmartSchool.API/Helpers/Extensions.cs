@@ -27,7 +27,7 @@ namespace SmartSchool.API.Helpers
 
             response.Headers.Add("Pagination", JsonConvert.SerializeObject(paginationHeader, camelCaseFormatter));
 
-            response.Headers.Add("Access-Control-Expose-Header", "Pagination");
+            response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
         }
     }
 }

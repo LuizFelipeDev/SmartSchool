@@ -53,6 +53,13 @@ namespace SmartSchool.API.Controllers
             return Ok(alunosResult);
         }
 
+         [HttpGet("ByDisciplina/{id}")]
+        public async Task<IActionResult> GetByDisciplinaId(int id)
+        {
+            var result = await _repo.GetAllAlunosByDisciplinaIdAsync(id, false);
+            return Ok(result);
+        }
+
         /// <summary>
         /// Método responsavel por retornar apenas 1 aluno por meio do ID do aluno
         /// </summary>
@@ -64,11 +71,10 @@ namespace SmartSchool.API.Controllers
             var aluno = _repo.GetAlunoById(id);
             if (aluno == null) return BadRequest("O aluno nao foi encontrado");
 
-            var alunoDto = _mapper.Map<AlunoDto>(aluno);
+            var alunoDto = _mapper.Map<AlunoRegistrarDto>(aluno);
 
             return Ok(alunoDto);
         }
-
 
 
         [HttpPost]
@@ -103,7 +109,7 @@ namespace SmartSchool.API.Controllers
         }
 
         [HttpPatch("{id}")]
-        public IActionResult Patch(int id, AlunoRegistrarDto model)
+        public IActionResult Patch(int id, AlunoPatchDto model)
         {
             var aluno = _repo.GetAlunoById(id);
             if (aluno == null) return BadRequest("Aluno não encontrado");
@@ -113,10 +119,28 @@ namespace SmartSchool.API.Controllers
             _repo.Update(aluno);
             if (_repo.SaveChanges())
             {
-                return Created($"/api/aluno/{model.Id}", _mapper.Map<AlunoDto>(aluno)); ;
+                return Created($"/api/aluno/{model.Id}", _mapper.Map<AlunoPatchDto>(aluno));
             }
 
             return BadRequest("Erro ao atualizar aluno");
+        }
+
+        [HttpPatch("{id}/trocarEstado")]
+        public IActionResult trocarEstado(int id, TrocaEstadoDto trocaEstado)
+        {
+            var aluno = _repo.GetAlunoById(id);
+            if (aluno == null) return BadRequest("Aluno não encontrado");
+
+            aluno.Ativo = trocaEstado.Estado;
+
+            _repo.Update(aluno);
+            if (_repo.SaveChanges())
+            {
+                var msn = aluno.Ativo ? "ativado" : "desativado";
+                return Ok(new { message = $"Aluno {msn} com sucesso!" });
+            }
+
+            return BadRequest("Aluno não Atualizado");
         }
 
         [HttpDelete("{id}")]

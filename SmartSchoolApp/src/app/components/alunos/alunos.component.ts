@@ -1,13 +1,25 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { PaginatedResult, Pagination } from 'src/app/models/Pagination';
+
+import { Aluno } from '../../models/Aluno';
+import { Professor } from '../../models/Professor';
+
+import { AlunoService } from '../../services/aluno.service';
+import { ProfessorService } from '../../services/professor.service';
 
 @Component({
   selector: 'app-alunos',
   templateUrl: './alunos.component.html',
   styleUrls: ['./alunos.component.css']
 })
-export class AlunosComponent implements OnInit {
+export class AlunosComponent implements OnInit, OnDestroy {
 
   public modalRef: BsModalRef;
   public alunoForm: FormGroup;
@@ -52,7 +64,7 @@ export class AlunosComponent implements OnInit {
         console.error(error.message);
         this.spinner.hide();
       }, () => this.spinner.hide()
-      );
+    );
   }
 
   criarForm(): void {
@@ -88,9 +100,9 @@ export class AlunosComponent implements OnInit {
       this.spinner.show();
 
       if (this.modeSave === 'post') {
-        this.aluno = { ...this.alunoForm.value };
+        this.aluno = {...this.alunoForm.value};
       } else {
-        this.aluno = { id: this.alunoSelecionado.id, ...this.alunoForm.value };
+        this.aluno = {id: this.alunoSelecionado.id, ...this.alunoForm.value};
       }
 
       this.alunoService[this.modeSave](this.aluno)
@@ -127,13 +139,13 @@ export class AlunosComponent implements OnInit {
 
         this.toastr.success('Alunos foram carregado com Sucesso!');
       },
-        (error: any) => {
-          this.toastr.error('Alunos não carregados!');
-          console.error(error);
-          this.spinner.hide();
-        },
-        () => this.spinner.hide()
-      );
+      (error: any) => {
+        this.toastr.error('Alunos não carregados!');
+        console.error(error);
+        this.spinner.hide();
+      },
+      () => this.spinner.hide()
+    );
   }
 
   pageChanged(event: any): void {
